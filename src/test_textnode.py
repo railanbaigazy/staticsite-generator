@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode
+from textnode import TextNode, TextTypes, split_nodes_delimiter
 
 
 class TestTextNode(unittest.TestCase):
@@ -33,6 +33,50 @@ class TestTextNode(unittest.TestCase):
         node = TextNode("This is a text node", "bold", "https://example.com")
         node2 = TextNode("This is a text node", "bold", "https://different-example.com")
         self.assertNotEqual(node, node2)
+    
+
+    def test_split_single_node(self):
+        node = TextNode("This is text with a `code block` word", TextTypes.TEXT)
+        new_nodes = split_nodes_delimiter([node], "`", TextTypes.CODE)
+        expected_nodes = [
+            TextNode("This is text with a ", TextTypes.TEXT),
+            TextNode("code block", TextTypes.CODE),
+            TextNode(" word", TextTypes.TEXT)
+        ]
+        self.assertEqual(new_nodes, expected_nodes)
+
+    def test_no_text_nodes(self):
+        node1 = TextNode("This is text", TextTypes.BOLD)
+        node2 = TextNode("with a `code block`", TextTypes.ITALIC)
+        new_nodes = split_nodes_delimiter([node1, node2], "`", TextTypes.CODE)
+        expected_nodes = [node1, node2]
+        self.assertEqual(new_nodes, expected_nodes)
+
+    def test_empty_delimiter(self):
+        node = TextNode("This is text with a `code block` word", TextTypes.TEXT)
+        new_nodes = split_nodes_delimiter([node], "", TextTypes.CODE)
+        expected_nodes = [node]
+        self.assertEqual(new_nodes, expected_nodes)
+
+    def test_multiple_delimiters(self):
+        node = TextNode("This is text with a `code block` and *italic* word", TextTypes.TEXT)
+        new_nodes = split_nodes_delimiter([node], "`", TextTypes.CODE)
+        expected_nodes = [
+            TextNode("This is text with a ", TextTypes.TEXT),
+            TextNode("code block", TextTypes.CODE),
+            TextNode(" and *italic* word", TextTypes.TEXT),
+        ]
+        self.assertEqual(new_nodes, expected_nodes)
+
+    def test_no_matching_delimiter(self):
+        node = TextNode("This is text with a `code block word", TextTypes.TEXT)
+        try:
+            split_nodes_delimiter([node], "`", TextTypes.CODE)
+        except ValueError as e:
+            self.assertEqual(str(e), "No matching closing delimiter")
+        else:
+            self.fail("Expected ValueError not raised")
+
 
 
 if __name__ == "__main__":
