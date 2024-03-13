@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, TextTypes, split_nodes_delimiter, extract_markdown_images
+from textnode import TextNode, TextTypes, split_nodes_delimiter, extract_markdown_images, extract_markdown_links
 
 
 class TestTextNode(unittest.TestCase):
@@ -79,12 +79,19 @@ class TestTextNode(unittest.TestCase):
 
 
     # Test extract_markdown_images function
-    def test_markdown_image(self):
+    def test_markdown_images(self):
         text = "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and ![another](https://i.imgur.com/dfsdkjfd.png)"
         expected_result = [("image", "https://i.imgur.com/zjjcJKZ.png"), ("another", "https://i.imgur.com/dfsdkjfd.png")]
         actual_result = extract_markdown_images(text)
         self.assertEqual(expected_result, actual_result)
 
+
+    # Test extract_markdown_links function
+    def test_markdown_links(self):
+        text = "This is text with a [link](https://www.example.com) and [another](https://www.example.com/another)"
+        expected_result = [("link", "https://www.example.com"), ("another", "https://www.example.com/another")]
+        actual_result = extract_markdown_links(text)
+        self.assertEqual(expected_result, actual_result)
 
 
 if __name__ == "__main__":
