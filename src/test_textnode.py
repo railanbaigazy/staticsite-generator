@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, TextTypes, split_nodes_delimiter
+from textnode import TextNode, TextTypes, split_nodes_delimiter, extract_markdown_images
 
 
 class TestTextNode(unittest.TestCase):
@@ -76,6 +76,14 @@ class TestTextNode(unittest.TestCase):
             self.assertEqual(str(e), "No matching closing delimiter")
         else:
             self.fail("Expected ValueError not raised")
+
+
+    # Test extract_markdown_images function
+    def test_markdown_image(self):
+        text = "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and ![another](https://i.imgur.com/dfsdkjfd.png)"
+        expected_result = [("image", "https://i.imgur.com/zjjcJKZ.png"), ("another", "https://i.imgur.com/dfsdkjfd.png")]
+        actual_result = extract_markdown_images(text)
+        self.assertEqual(expected_result, actual_result)
 
 
 
