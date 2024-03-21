@@ -4,7 +4,8 @@ from textnode import (
     TextNode, TextTypes, 
     split_nodes_delimiter, 
     extract_markdown_images, extract_markdown_links,
-    split_nodes_image, split_nodes_link
+    split_nodes_image, split_nodes_link,
+    text_to_textnodes
 )
 
 
@@ -159,6 +160,26 @@ class TestTextNode(unittest.TestCase):
         new_nodes = split_nodes_link([node, node2])
         expected_nodes = [node, node2]
         self.assertEqual(new_nodes, expected_nodes)
+
+
+    # Test text_to_textnodes
+    def test_text_to_textnodes(self):
+        self.maxDiff = None
+        text = "This is **text** with an *italic* word and a `code block` and an ![image](https://i.imgur.com/zjjcJKZ.png) and a [link](https://boot.dev)"
+        actual_nodes = text_to_textnodes(text)
+        expected_nodes = [
+            TextNode("This is ", TextTypes.TEXT),
+            TextNode("text", TextTypes.BOLD),
+            TextNode(" with an ", TextTypes.TEXT),
+            TextNode("italic", TextTypes.ITALIC),
+            TextNode(" word and a ", TextTypes.TEXT),
+            TextNode("code block", TextTypes.CODE),
+            TextNode(" and an ", TextTypes.TEXT),
+            TextNode("image", TextTypes.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and a ", TextTypes.TEXT),
+            TextNode("link", TextTypes.LINK, "https://boot.dev"),
+        ]
+        self.assertEqual(actual_nodes, expected_nodes)
 
         
 if __name__ == "__main__":
