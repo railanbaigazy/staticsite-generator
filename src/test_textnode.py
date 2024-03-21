@@ -129,6 +129,37 @@ class TestTextNode(unittest.TestCase):
         expected_nodes = [node, node2]
         self.assertEqual(new_nodes, expected_nodes)
 
+
+    # Test split_nodes_links function
+    def test_split_node_link(self):
+        node = TextNode(
+            "This is text with a [link](https://i.imgur.com/zjjcJKZ.png) and another [second link](https://i.imgur.com/3elNhQu.png)",
+            TextTypes.TEXT
+        )
+        new_nodes = split_nodes_link([node])
+        expected_nodes = [
+            TextNode("This is text with a ", TextTypes.TEXT),
+            TextNode("link", TextTypes.LINK, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextTypes.TEXT),
+            TextNode(
+                "second link", TextTypes.LINK, "https://i.imgur.com/3elNhQu.png"
+            ),
+        ]
+        self.assertEqual(new_nodes, expected_nodes)
+    
+    def test_split_node_no_link(self):
+        node = TextNode("Text with no link", TextTypes.TEXT)
+        new_nodes = split_nodes_link([node])
+        expected_nodes = [node]
+        self.assertEqual(new_nodes, expected_nodes)
+
+    def test_split_node_no_multiple_links(self):
+        node = TextNode("Text with no link", TextTypes.TEXT)
+        node2 = TextNode("Another text with no link", TextTypes.TEXT)
+        new_nodes = split_nodes_link([node, node2])
+        expected_nodes = [node, node2]
+        self.assertEqual(new_nodes, expected_nodes)
+
         
 if __name__ == "__main__":
     unittest.main()

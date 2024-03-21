@@ -77,36 +77,40 @@ def extract_markdown_links(text):
     links = re.findall(r"\[(.*?)\]\((.*?)\)", text)
     return links
 
-
-def split_nodes_image(old_nodes):
+def split_nodes(old_nodes, extract_func, text_type):
     new_nodes = []
     for node in old_nodes:
         if isinstance(node, TextNode) and node.text_type == TextTypes.TEXT:
-            images = extract_markdown_images(node.text)
-            if images:
+            elements = extract_func(node.text)
+            if elements:
                 parts = []
-                for image in images:   
+                for element in elements:
+                    exclamation_mark =  '!' if text_type == TextTypes.IMAGE else ''
                     if parts:
-                        last_part = parts[len(parts) - 1].split(f"![{image[0]}]({image[1]})")
+                        last_part = parts[len(parts) - 1].split(
+                            f"{exclamation_mark}[{element[0]}]({element[1]})"
+                        )
                         new_parts = parts[:len(parts) - 1] + [""] + last_part
                         parts = new_parts
                     else:
-                        new_parts = node.text.split(f"![{image[0]}]({image[1]})")
+                        new_parts = node.text.split(f"{exclamation_mark}[{element[0]}]({element[1]})")
                         parts = new_parts
 
-                image_count = 0
+                count = 0
                 for i, part in enumerate(parts):
                     if i % 2 == 0:
                         new_nodes.append(TextNode(part, TextTypes.TEXT))
                     else:
-                        new_nodes.append(TextNode(images[image_count][0], TextTypes.IMAGE, images[image_count][1]))
-                        image_count += 1
+                        new_nodes.append(TextNode(elements[count][0], text_type, elements[count][1]))
+                        count += 1
             else:
                 new_nodes.append(node)
         else:
             new_nodes.append(node)
     return new_nodes
-            
+
+def split_nodes_image(old_nodes):
+    return split_nodes(old_nodes, extract_markdown_images, TextTypes.IMAGE)
 
 def split_nodes_link(old_nodes):
-    pass
+    return split_nodes(old_nodes, extract_markdown_links, TextTypes.LINK)
