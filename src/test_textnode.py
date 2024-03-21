@@ -1,6 +1,11 @@
 import unittest
 
-from textnode import TextNode, TextTypes, split_nodes_delimiter, extract_markdown_images, extract_markdown_links
+from textnode import (
+    TextNode, TextTypes, 
+    split_nodes_delimiter, 
+    extract_markdown_images, extract_markdown_links,
+    split_nodes_image, split_nodes_link
+)
 
 
 class TestTextNode(unittest.TestCase):
@@ -94,5 +99,36 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(expected_result, actual_result)
 
 
+    # Test split_nodes_images function
+    def test_split_node_image(self):
+        node = TextNode(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
+            TextTypes.TEXT
+        )
+        new_nodes = split_nodes_image([node])
+        expected_nodes = [
+            TextNode("This is text with an ", TextTypes.TEXT),
+            TextNode("image", TextTypes.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextTypes.TEXT),
+            TextNode(
+                "second image", TextTypes.IMAGE, "https://i.imgur.com/3elNhQu.png"
+            ),
+        ]
+        self.assertEqual(new_nodes, expected_nodes)
+
+    def test_split_node_no_image(self):
+        node = TextNode("Text with no image", TextTypes.TEXT)
+        new_nodes = split_nodes_image([node])
+        expected_nodes = [node]
+        self.assertEqual(new_nodes, expected_nodes)
+
+    def test_split_node_no_multiple_images(self):
+        node = TextNode("Text with no image", TextTypes.TEXT)
+        node2 = TextNode("Another text with no image", TextTypes.TEXT)
+        new_nodes = split_nodes_image([node, node2])
+        expected_nodes = [node, node2]
+        self.assertEqual(new_nodes, expected_nodes)
+
+        
 if __name__ == "__main__":
     unittest.main()
