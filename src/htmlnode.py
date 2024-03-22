@@ -1,3 +1,14 @@
+from enum import Enum
+
+class BlockTypes(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UL = "unordered_list"
+    OL = "ordered_list"
+
+
 class HTMLNode:
     def __init__(self, tag=None, value=None, children=None, props=None):
         self.tag = tag
@@ -62,4 +73,21 @@ def markdown_to_blocks(markdown):
         if len(part) > 0:
             blocks.append(part.strip())
     return blocks
+
+def block_to_block_type(block):
+    if block.startswith("#") and block.lstrip("#").startswith(" "):
+        return BlockTypes.HEADING
+    if block.startswith("```") and block.endswith("```"):
+        return BlockTypes.CODE
+    lines = block.split("\n")
+    if all(line.startswith(">") for line in lines):
+        return BlockTypes.QUOTE
+    if all(line.startswith(f"{i + 1}.") for i, line in enumerate(lines)):
+        return BlockTypes.OL
+    if all(line.startswith("*") or line.startswith("-") for line in lines):
+        return BlockTypes.UL
+    return BlockTypes.PARAGRAPH
+
+
+    
         
