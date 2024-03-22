@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode, ParentNode
+from htmlnode import HTMLNode, LeafNode, ParentNode, markdown_to_blocks
 
 class TestHTMLNode(unittest.TestCase):
     def test_props(self):
@@ -73,6 +73,25 @@ class TestHTMLNode(unittest.TestCase):
             node.to_html(),
             "<h2><b>Bold text</b>Normal text<i>italic text</i>Normal text</h2>",
         )
+
+    
+    # Test markdown_to_blocks function
+    def test_markdown_to_blocks(self):
+        try:
+            with open("src/test_markdowns/test_1.md", "r") as file:
+                markdown = file.read()
+            actual_blocks = markdown_to_blocks(markdown)
+            expected_blocks = [
+                "# This is a heading",
+                "This is a paragraph of text. It has some **bold** and *italic* words inside of it.",
+                "* This is a list item\n* This is another list item"
+            ]
+            self.assertEqual(actual_blocks, expected_blocks)
+        except FileNotFoundError:
+            self.fail("test_markdown.md file not found")
+        except Exception as e:
+            self.fail(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     unittest.main()

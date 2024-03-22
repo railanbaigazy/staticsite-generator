@@ -54,4 +54,12 @@ class ParentNode(HTMLNode):
         return (
             f"<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>"
         )
+    
+def markdown_to_blocks(markdown):
+    blocks = []
+    parts = markdown.split("\n\n")
+    for part in parts:
+        if len(part) > 0:
+            blocks.append(part.strip())
+    return blocks
         
