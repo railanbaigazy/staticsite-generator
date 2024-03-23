@@ -88,6 +88,37 @@ def block_to_block_type(block):
         return BlockTypes.UL
     return BlockTypes.PARAGRAPH
 
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    children = []
+    for block in blocks:
+        if block_to_block_type(block) == BlockTypes.HEADING:
+            level = block.count("#")
+            tag = f"h{level if level < 7 else 6}"
+            value = block.lstrip("#").strip()
+            children.append(LeafNode(tag, value))
+        elif block_to_block_type(block) == BlockTypes.CODE:
+            value = "\n".join(block.split("\n")[1:-1])
+            children.append(ParentNode("pre", [LeafNode("code", value)]))
+        elif block_to_block_type(block) == BlockTypes.QUOTE:
+            lines = block.split("\n")
+            value = "\n".join(line.lstrip("> ").strip() for line in lines)
+            children.append(ParentNode("blockquote", [LeafNode("p", value)]))
+        elif block_to_block_type(block) == BlockTypes.UL:
+            lines = block.split("\n")
+            items = [line.lstrip("*- ").strip() for line in lines if line.strip()]
+            inner_children = [LeafNode("li", item) for item in items]
+            children.append(ParentNode("ul", inner_children))
+        elif block_to_block_type(block) == BlockTypes.OL:
+            lines = block.split("\n")
+            items = [line.split(".", 1)[1].strip() for line in lines if line.strip()]
+            inner_children = [LeafNode("li", item) for item in items]
+            children.append(ParentNode("ol", inner_children))
+        else:
+            children.append(LeafNode("p", block.strip()))
+    return children
+
+
 
     
         
