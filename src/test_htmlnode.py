@@ -2,7 +2,7 @@ import unittest
 from htmlnode import (
     HTMLNode, LeafNode, ParentNode, 
     BlockTypes, 
-    markdown_to_blocks, block_to_block_type
+    markdown_to_blocks, block_to_block_type, markdown_to_html_node
 )
 
 class TestHTMLNode(unittest.TestCase):
@@ -145,6 +145,44 @@ class TestHTMLNode(unittest.TestCase):
         actual_type = block_to_block_type(block)
         expected_type = BlockTypes.PARAGRAPH
         self.assertEqual(actual_type, expected_type)
+
+    
+    # Test markdown_to_html_node function
+    def test_heading_conversion(self):
+        markdown = "# Heading 1\n## Heading 2\n### Heading 3"
+        html_node = markdown_to_html_node(markdown)
+        expected_html = "<div><h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3></div>"
+        self.assertEqual(html_node.to_html(), expected_html)
+
+    def test_code_conversion(self):
+        markdown = "```\nprint('Hello, world!')\n```"
+        html_node = markdown_to_html_node(markdown)
+        expected_html = "<div><pre><code>print('Hello, world!')</code></pre></div>"
+        self.assertEqual(html_node.to_html(), expected_html)
+
+    def test_quote_conversion(self):
+        markdown = "> This is a quote\n> Second line of the quote"
+        html_node = markdown_to_html_node(markdown)
+        expected_html = "<div><blockquote><p>This is a quote</p><p>Second line of the quote</p></blockquote></div>"
+        self.assertEqual(html_node.to_html(), expected_html)
+
+    def test_unordered_list_conversion(self):
+        markdown = "* Item 1\n* Item 2\n* Item 3"
+        html_node = markdown_to_html_node(markdown)
+        expected_html = "<div><ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul></div>"
+        self.assertEqual(html_node.to_html(), expected_html)
+
+    def test_ordered_list_conversion(self):
+        markdown = "1. First item\n2. Second item\n3. Third item"
+        html_node = markdown_to_html_node(markdown)
+        expected_html = "<div><ol><li>First item</li><li>Second item</li><li>Third item</li></ol></div>"
+        self.assertEqual(html_node.to_html(), expected_html)
+
+    def test_paragraph_conversion(self):
+        markdown = "This is a paragraph.\n\nThis is another paragraph."
+        html_node = markdown_to_html_node(markdown)
+        expected_html = "<div><p>This is a paragraph.</p><p>This is another paragraph.</p></div>"
+        self.assertEqual(html_node.to_html(), expected_html)
 
 if __name__ == "__main__":
     unittest.main()

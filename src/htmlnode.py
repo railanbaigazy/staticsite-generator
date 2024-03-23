@@ -90,33 +90,38 @@ def block_to_block_type(block):
 
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
-    children = []
+    div_node = ParentNode("div", [])  # Initialize div_node with empty children list
     for block in blocks:
         if block_to_block_type(block) == BlockTypes.HEADING:
-            level = block.count("#")
-            tag = f"h{level if level < 7 else 6}"
-            value = block.lstrip("#").strip()
-            children.append(LeafNode(tag, value))
+            for line in block.split("\n"):
+                level = line.count("#")
+                tag = f"h{level if level < 7 else 6}"
+                value = line.lstrip("#").strip()
+                div_node.children.append(LeafNode(tag, value))
         elif block_to_block_type(block) == BlockTypes.CODE:
             value = "\n".join(block.split("\n")[1:-1])
-            children.append(ParentNode("pre", [LeafNode("code", value)]))
+            code_node = ParentNode("code", [LeafNode("", value)])  # Create code_node
+            div_node.children.append(ParentNode("pre", [code_node]))  # Append code_node to pre tag
         elif block_to_block_type(block) == BlockTypes.QUOTE:
             lines = block.split("\n")
-            value = "\n".join(line.lstrip("> ").strip() for line in lines)
-            children.append(ParentNode("blockquote", [LeafNode("p", value)]))
+            inner_children = [LeafNode("p", line.lstrip("> ").strip()) for line in lines]
+            div_node.children.append(ParentNode("blockquote", inner_children))
         elif block_to_block_type(block) == BlockTypes.UL:
             lines = block.split("\n")
             items = [line.lstrip("*- ").strip() for line in lines if line.strip()]
             inner_children = [LeafNode("li", item) for item in items]
-            children.append(ParentNode("ul", inner_children))
+            div_node.children.append(ParentNode("ul", inner_children))
         elif block_to_block_type(block) == BlockTypes.OL:
             lines = block.split("\n")
             items = [line.split(".", 1)[1].strip() for line in lines if line.strip()]
             inner_children = [LeafNode("li", item) for item in items]
-            children.append(ParentNode("ol", inner_children))
+            div_node.children.append(ParentNode("ol", inner_children))
         else:
-            children.append(LeafNode("p", block.strip()))
-    return children
+            div_node.children.append(LeafNode("p", block.strip()))
+    return div_node
+
+
+
 
 
 
